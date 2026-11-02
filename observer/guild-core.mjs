@@ -15,10 +15,27 @@ export function publicSeat(s){
 }
 export function publicStanding(d,key,checkedAt){
  if(d?.seat?.key!==key||!Number.isInteger(d.week)||!Array.isArray(d.standings))throw Error('invalid-standings');
- return {key,week:d.week,checkedAt,turningAt:num(d.turningAt),rows:d.standings.map(s=>({guild:publicGuild(s.guild),influence:num(s.influence),legacy:num(s.legacy),tribute:num(s.tribute),contributors:num(s.accounts),holder:s.holder===true})).filter(s=>s.guild)};
+ return {key,week:d.week,checkedAt,turningAt:num(d.turningAt),
+  // Ownership and battles come from /seats/standings, NOT /seats/list.
+  holder:d.holder?.guild?{guild:publicGuild(d.holder.guild),standing:num(d.holder.standing),tithe:num(d.holder.tithe)}:null,
+  battle:d.battle?{kind:text(d.battle.kind,24),state:text(d.battle.state,24),startsAt:num(d.battle.startsAt)||null,endsAt:num(d.battle.endsAt)||null,
+    moved:d.battle.moved===true,guild:publicGuild(d.battle.guild),against:publicGuild(d.battle.against)}:null,
+  defence:Number.isFinite(d.defence)?d.defence:null,
+  rows:d.standings.map(s=>({guild:publicGuild(s.guild),influence:num(s.influence),legacy:num(s.legacy),tribute:num(s.tribute),contributors:num(s.accounts),holder:s.holder===true})).filter(s=>s.guild)};
 }
 export function buildGuildSnapshot({seats,reads,week,startedAt,now,complete=false,failed=0,error=null}){
  const guilds=new Map(),eligible=seats.filter(s=>s.state==='confirmed');
+ // The registry endpoint has no holder field. Enrich its seat rows using the
+ // separately saved current-week standings, whose holder flags are authoritative.
+ // Older cached standings lack r.holder; each r.rows[].holder is still available.
+ for(const seat of eligible){
+  const r=reads[seat.key];if(!r||r.week!==week)continue;
+  const marked=r.rows.filter(x=>x.holder===true&&x.guild);
+  if(r.holder?.guild){seat.holder=r.holder.guild;seat.standing=r.holder.standing;seat.tithe=r.holder.tithe;}
+  else if(marked.length===1)seat.holder=marked[0].guild;
+  if(Object.prototype.hasOwnProperty.call(r,'battle'))seat.battle=r.battle;
+  if(r.defence!==undefined)seat.defence=r.defence;
+ }
  const get=g=>{if(!g)return null;if(!guilds.has(g.id))guilds.set(g.id,{...g,influence:0,legacy:0,currentInfluence:0,territories:[],contests:[],checkedAt:null});return guilds.get(g.id);};
  for(const s of seats){if(s.holder)get(s.holder).territories.push(s.key);get(s.battle?.guild);get(s.battle?.against);}
  let checked=0,oldest=null;
