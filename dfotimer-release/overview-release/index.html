@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daggerfall Watch · Event Timers & Loot</title>
+  <meta name="description" content="Daggerfall Online event timers and loot tables. Track your next hunt and discover every Gilded reward.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="referrer" content="no-referrer"><link rel="canonical" href="https://dfo.spaceghosts.com/">
+  <meta name="theme-color" content="#302a22"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="vendors.css?v=shops-20261027">
+
+
+<link rel="stylesheet" href="daggerfall-theme.css?v=parchment-20261027-readable3">
+<link rel="stylesheet" href="tamriel-update.css?v=tamriel-20261028">
+<link rel="stylesheet" href="dragon-map.css?v=dragon-map-20261029-v2">
+<link rel="stylesheet" href="dragon-atlas.css?v=atlas-v3-20261030">
+<link rel="stylesheet" href="event-overview.css?v=overview-20261029">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="./"><span class="brand-mark">✧</span><span>DAGGERFALL WATCH<small>THE TAMRIEL CHRONICLE</small></span></a><nav aria-label="Main"><a href="#events" class="active">EVENT WATCH</a><button id="watchlist-nav">MY WATCHLIST <span id="watch-count">0</span></button></nav><span class="connection"><i></i> EVENT CODEX</span></header>
+<main>
+<section class="hero" aria-labelledby="title">
+ <div class="hero-art" aria-hidden="true"><svg viewBox="0 0 900 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="fog" x2="0" y2="1"><stop stop-color="#66a99d" stop-opacity=".22"/><stop offset="1" stop-color="#081211"/></linearGradient><pattern id="grid" width="45" height="45" patternUnits="userSpaceOnUse"><path d="M45 0H0V45" fill="none" stroke="#85b9a5" stroke-opacity=".08"/></pattern></defs><rect width="900" height="320" fill="url(#grid)"/><circle cx="643" cy="98" r="69" fill="#b9c9a1" opacity=".12"/><circle cx="643" cy="98" r="89" fill="none" stroke="#d1be7e" opacity=".14"/><path d="M0 275L80 208 148 244 210 174 286 240 351 211 435 258 510 209 583 249 680 173 754 222 816 186 900 232V320H0Z" fill="#142c2b"/><path d="M290 320V242h40V160h-9l38-75 38 75h-10v40h32v-15h13v15h18v-15h14v15h28v-62h-9l33-61 34 61h-10v46h49v-12h14v12h24V98h-10l43-82 43 82h-11v81h24v-12h14v12h28v-45h-10l32-60 33 60h-10v107h38v79Z" fill="#0a171b" stroke="#547471" stroke-opacity=".4"/><path d="M617 320v-68q24-42 48 0v68M510 153v20m132-55v22m-278 41v19m364-43v17m-187 30v18m69-21v19m63 3v19" fill="#07100f" stroke="#b5a567" stroke-opacity=".3" stroke-width="5"/><path d="M642 18V2l37 7-37 8" fill="#9d8754" opacity=".6"/><path d="M0 295Q200 246 410 291T900 278V320H0" fill="url(#fog)"/></svg></div>
+ <div class="hero-copy"><p class="eyebrow"><span class="line"></span> DAGGERFALL ONLINE · COMMUNITY COMPANION</p><h1>The next hunt<br>starts <em>here.</em></h1><p class="intro">Keep watch across Tamriel.<br>Find your event. Know your reward.</p><div class="hero-tags"><span>✦ GILDED FIRST</span><span>◷ EVENT TIMERS</span><span>◇ LOOT CODEX</span></div></div>
+ <div class="hero-foot"><span><i></i> <span id="data-status">READING EVENT CODEX</span></span><span id="local-clock"></span></div>
+</section>
+<div class="stats" aria-label="Event overview"><div><span class="stat-label">EVENTS TRACKED</span><strong id="stat-events">—</strong><small>Across Tamriel</small></div><div><span class="stat-label">GILDED REWARDS</span><strong id="stat-gilded" class="gold">—</strong><small>Rare finds worth the journey</small></div><div><span class="stat-label">YOUR WATCHLIST</span><strong id="stat-watch">0</strong><small>Saved on this device</small></div><div><span class="stat-label">TIMING SOURCE</span><strong class="small-stat" id="timing-source">Checking</strong><small id="timing-summary">Reading verified rules</small></div></div>
+<div class="view-tabs" role="tablist" aria-label="Watch tools"><button id="events-tab" role="tab" data-view="events" aria-controls="events" aria-selected="true">◷ EVENT WATCH</button><button id="vendors-tab" role="tab" data-view="vendors" aria-controls="vendors" aria-selected="false" tabindex="-1">◇ VENDOR DATABASE</button></div><section id="events" role="tabpanel" aria-labelledby="events-tab"><div class="section-heading"><div><p class="eyebrow">THE ADVENTURER’S FIELD GUIDE</p><h2 id="event-title">Event watch <span id="result-count"></span></h2></div><button class="text-button" id="timing-help">How timers work ↗</button></div>
+<div class="toolbar"><div class="filters" role="group" aria-label="Filter events"><button class="selected" data-filter="all" aria-pressed="true">All events</button><button data-filter="gilded" aria-pressed="false">✦ Gilded drops</button><button data-filter="watched" aria-pressed="false">☆ Watching</button></div><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search events or loot…" aria-label="Search events or loot"></label><label class="sort-label">Sort<select id="sort" aria-label="Sort events"><option value="next" selected>Next event</option><option value="name">Event name</option><option value="gilded">Gilded first</option></select></label></div>
+<p id="notice" class="notice">Loading source-verified event information…</p><div id="event-grid" class="event-grid"></div><p id="empty" class="empty" hidden>No events match. Try another search or add events to your watchlist.</p>
+</section>
+<section id="vendors" role="tabpanel" aria-labelledby="vendors-tab" hidden>
+ <div class="section-heading"><div><p class="eyebrow">THE TAMRIEL TRADING DIRECTORY</p><h2 id="vendor-title">Find your next treasure.</h2></div><button id="vendor-reload" class="text-button">Refresh snapshot ↻</button></div>
+ <div class="vendor-status"><span id="vendor-coverage">Reading public vendor inventory…</span><span id="vendor-health"></span></div>
+ <div class="vendor-toolbar">
+  <label class="vendor-query">Search <span class="search"><span aria-hidden="true">⌕</span><input id="vendor-query" type="search" maxlength="160" placeholder="Item, set, material, seller, or town…" aria-label="Search vendor items"></span></label>
+  <label>Set <select id="vendor-set"><option value="">All sets</option></select></label>
+  <label>Region <select id="vendor-region"><option value="">All regions</option></select></label>
+  <label>Rarity <select id="vendor-rarity"><option value="">All rarities</option><option value="gilded">✦ Gilded</option><option value="aetheric">Aetheric</option><option value="artifact">Artifact</option><option value="legendary">Legendary</option><option value="rare">Rare</option><option value="magic">Magic</option><option value="common">Common</option></select></label>
+  <label>Category <select id="vendor-category"><option value="">All categories</option></select></label>
+  <label>Currency <select id="vendor-currency"><option value="">All currencies</option><option value="gold">Gold</option><option value="marks">Marks</option></select></label>
+  <label>Max price <input id="vendor-max" type="number" min="0" step="1" placeholder="Any"></label>
+  <button id="vendor-clear" class="text-button">Clear filters</button>
+ </div>
+ <p id="vendor-notice" class="notice" role="status">Loading inventory…</p>
+ <div class="vendor-results-bar"><span id="vendor-result-count" role="status" aria-live="polite"></span><label class="sort-label">Sort <select id="vendor-sort" aria-label="Sort vendor listings"><option value="gilded">Gilded first</option><option value="price">Price by currency</option><option value="newest">Newest listed</option><option value="name">Item name</option></select></label></div>
+ <div id="vendor-table-wrap" class="vendor-table-wrap" tabindex="0" aria-label="Vendor inventory; scroll horizontally on small screens" hidden><table class="vendor-table"><thead><tr><th scope="col">ITEM / DETAILS</th><th scope="col">PRICE</th><th scope="col">QTY</th><th scope="col">SELLER / LOCATION</th><th scope="col">DIRECTIONS</th></tr></thead><tbody id="vendor-rows"></tbody></table></div>
+ <p id="vendor-empty" class="empty" hidden></p>
+ <div class="vendor-pagination"><button id="vendor-prev" disabled>← Previous</button><span id="vendor-page">Page 1</span><button id="vendor-next" disabled>Next →</button></div>
+ <p class="vendor-help"><strong>Find it in game:</strong> open Stats → Vendor, choose the region, find the seller, and select Set waypoint. Listings come from public player vendors. Open an item for condition, listing dates, and map details.</p>
+</section>
+<section class="field-notes"><span class="note-icon">⌘</span><div><p class="eyebrow">A LITTLE KNOWLEDGE. A BETTER HUNT.</p><h3>Know what you’re chasing.</h3><p>Gilded drops lead every loot table. Open an event for reward conditions, drop odds, and the source behind the numbers.</p></div><a href="https://daggerfalljs.dev/" target="_blank" rel="noopener noreferrer">ENTER DAGGERFALL ↗</a></section>
+<footer><span><b>✧ DAGGERFALL WATCH</b> <span class="muted">/ TAMRIEL</span></span><span>Unofficial community tool · No account required</span><button id="sources-button" class="text-button">Sources & credits ↗</button></footer>
+</main>
+<dialog id="info-dialog"><button class="dialog-close" aria-label="Close dialog">×</button><div id="dialog-content"></div></dialog><div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=overview-20261029"></script><script type="module" src="vendors.js?v=stats-20261027"></script>
+  <script defer src="my-shop-nav.js"></script>
+<script type="module" src="dragon-atlas.js?v=atlas-v3-20261030"></script>
+</body></html>

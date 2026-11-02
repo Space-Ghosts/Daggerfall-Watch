@@ -1,0 +1,28 @@
+/* The real DFO atlas; markers are anchored to calibrated world pixels. */
+.atlas-v3-panel{margin:14px 0 18px;border:1px solid rgba(165,122,65,.65);padding:12px;background:#e0c99e;color:#38281a}
+.atlas-v3-place{font-weight:700;letter-spacing:.02em;margin-bottom:4px;color:#38281a}
+.atlas-v3-directions{font-size:.9rem;line-height:1.45;color:#473522;margin:4px 0 10px}
+.atlas-v3-controls{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.atlas-v3-button{background:#3e3023;color:#f0dfb9;border:1px solid #80683e;padding:7px 12px;cursor:pointer;border-radius:2px;font:inherit;font-size:.89rem}
+.atlas-v3-button:hover,.atlas-v3-button:focus-visible{background:#654a2d}
+.atlas-v3-viewport{height:min(66vh,540px);min-height:340px;position:relative;overflow:hidden;touch-action:none;cursor:grab;background:#ddcba6;border:2px solid #8c6f48;user-select:none}
+.atlas-v3-viewport:active{cursor:grabbing}
+.atlas-v3-content{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;pointer-events:none}
+.atlas-v3-image{display:block;max-width:none!important;max-height:none!important;object-fit:fill;user-select:none;pointer-events:none}
+.atlas-v3-overlays{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.atlas-v3-route{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.atlas-v3-marker{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:3;--cross-size:14px}
+.atlas-v3-marker[hidden]{display:none!important}
+.atlas-v3-ring{position:absolute;width:var(--cross-size);height:var(--cross-size);left:calc(var(--cross-size)*-.5);top:calc(var(--cross-size)*-.5);border:2px solid currentColor;border-radius:50%;box-shadow:0 0 0 1px #fff,0 0 3px #000a;box-sizing:border-box}
+.atlas-v3-cross{position:absolute;background:currentColor;box-shadow:0 0 0 1px #fff9}
+.atlas-v3-cross-h{left:calc(var(--cross-size)*-.65);top:-1px;width:calc(var(--cross-size)*1.3);height:2px}
+.atlas-v3-cross-v{left:-1px;top:calc(var(--cross-size)*-.65);width:2px;height:calc(var(--cross-size)*1.3)}
+.atlas-v3-centre{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:#fff;border:1px solid currentColor;box-sizing:border-box}
+.atlas-v3-dragon{color:#c81e20}
+.atlas-v3-town{color:#1269aa}
+.atlas-v3-marker-tip{position:absolute;left:14px;top:-18px;white-space:nowrap;display:none;padding:2px 5px;background:#efe1bf;border:1px solid #7c6547;color:#2c2116;font-size:12px;font-weight:700;box-shadow:0 1px 2px #0002}
+.atlas-v3-labels-on .atlas-v3-marker-tip{display:block}
+.atlas-v3-ruler{display:flex;align-items:center;gap:10px;font-size:12px;color:#493323;margin-top:10px}
+.atlas-v3-ruler-line{border-left:2px solid #4d3621;border-right:2px solid #4d3621;border-bottom:3px solid #4d3621;display:block;height:9px;flex:none}
+.atlas-v3-stats{font-size:12px;color:#59462f;margin:8px 0 0}
+.atlas-v3-loading,.atlas-v3-error{color:#533b24;font-size:.9rem;line-height:1.45;margin:8px 0}

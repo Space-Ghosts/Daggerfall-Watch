@@ -1,0 +1,4 @@
+/* Applied only to the Guild Directory when shown inside the main-page tab. */
+html, body { min-width: 0 !important; background: transparent !important; }
+header.masthead { display: none !important; }
+body > main { width: 100% !important; max-width: none !important; margin: 0 auto !important; padding: 0 !important; }

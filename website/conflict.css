@@ -1,0 +1,130 @@
+/* CONF_TAB_V2: Conflict tab inherits Daggerfall Watch's parchment palette. */
+#conflict{color:#40372c;font-family:Inter,Arial,sans-serif;font-size:13px;line-height:1.65}
+#conflict *{box-sizing:border-box}
+#conflict .conflict-heading{border-bottom:1px solid #a38a64;padding-bottom:18px;margin-bottom:18px}
+#conflict .conflict-heading h2{font-family:Cinzel,Georgia,serif;font-size:29px;font-weight:500;color:#51371f;line-height:1.25;margin:5px 0 10px}
+#conflict .conflict-heading p:last-child{color:#403d35;font-size:13px;line-height:1.7;margin:0}
+#conflict .conflict-status{background:#f3e4c7;border:1px solid #b1986c;border-left:4px solid #8c633a;padding:12px 17px;font-size:12px;color:#51412f;margin-bottom:18px}
+#conflict .conflict-status.stale{background:#f5dfc1;border-left-color:#aa663c}
+#conflict .conflict-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+#conflict .conflict-metric{background:#f8edce;border:1px solid #a17e47;padding:15px 20px}
+#conflict .conflict-metric strong{display:block;font-family:Georgia,serif;font-size:29px;color:#654020;font-weight:500;line-height:1.3}
+#conflict .conflict-metric span{font-size:12px;color:#66533d}
+#conflict .conflict-toolbar{background:#e7d4ad;border:1px solid #967243;padding:16px;display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+#conflict .conflict-toolbar label{display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:12px;min-width:140px}
+#conflict .conflict-toolbar label:first-child{flex:1;min-width:210px}
+#conflict input,#conflict select{font:inherit;font-size:13px;background:#fff8e9;border:1px solid #9f8154;border-radius:0;padding:10px;color:#352e26;max-width:100%}
+#conflict button{font:inherit;cursor:pointer;border:1px solid #785431;background:#694725;color:#fff0d4;padding:10px 15px;box-shadow:inset 0 1px #b39b72}
+#conflict button:disabled{opacity:.6;cursor:wait}
+#conflict a{color:#75431d;text-decoration:none;font-weight:700}
+#conflict a:hover{text-decoration:underline}
+#conflict :focus-visible{outline:3px solid #266583;outline-offset:3px}
+#conflict .conflict-results{font-size:12px;color:#5a4836;margin-bottom:14px}
+#conflict .conflict-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;align-items:start}
+#conflict .conflict-card{border:1px solid #9a7747;background:linear-gradient(140deg,#fcf2d9,#eddfbf);padding:20px;box-shadow:0 3px 7px #3925121d;min-width:0}
+#conflict .conflict-card-top{display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:10px;border-bottom:1px solid #cab38d;padding-bottom:13px;margin-bottom:13px}
+#conflict .conflict-region{font-size:10px;font-weight:700;letter-spacing:.09em;color:#87522d;text-transform:uppercase}
+#conflict .conflict-card h3{font-family:Cinzel,Georgia,serif;font-size:21px;font-weight:500;color:#4f3520;margin:4px 0 0;line-height:1.3}
+#conflict .conflict-pill{font-size:10px;font-weight:700;letter-spacing:.04em;padding:5px 9px;border:1px solid #b49164;white-space:normal;align-self:center;color:#684a2b;background:#eee0bd}
+#conflict .conflict-pill.open{color:#fff6df;background:#79372b;border-color:#753b32}
+#conflict .conflict-pill.upcoming{background:#e0c48b;border-color:#b58b47;color:#593b20}
+#conflict .conflict-versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;padding:6px 0 14px}
+#conflict .conflict-party{min-width:0;overflow-wrap:anywhere}
+#conflict .conflict-party-role{display:block;font-weight:700;font-size:10px;letter-spacing:.08em;color:#745b3f;margin-bottom:4px}
+#conflict .conflict-vs{font:bold 14px Georgia,serif;color:#88512a}
+#conflict .conflict-date{font-weight:600;font-size:12px;color:#593e2a;padding:6px 0 12px}
+#conflict .conflict-holder{margin:2px 0 15px;font-size:13px}
+#conflict .conflict-contender-title{font-size:10px;font-weight:700;letter-spacing:.07em;color:#76512c;margin:8px 0}
+#conflict .conflict-contender-list{border-top:1px solid #ceb992}
+#conflict .conflict-contender{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #dbcaaa;padding:7px 0;font-size:12px}
+#conflict .conflict-contender small{font-size:10px;color:#79664d}
+#conflict .conflict-score{white-space:nowrap;font-variant-numeric:tabular-nums;color:#594632}
+#conflict .conflict-card-foot{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:10px;color:#685846;margin-top:15px}
+#conflict .conflict-more{font-size:11px;color:#755b40}
+#conflict .conflict-empty{background:#f6ead1;padding:20px;border:1px solid #b3976d}
+#conflict .conflict-disclaimer{margin-top:22px;border-top:1px solid #b49b6e;padding:16px 2px;font-size:12px;color:#544332}
+body:has(#conflict:not([hidden])) .hero,body:has(#conflict:not([hidden])) .stats{display:none}
+body:has(#conflict:not([hidden])) .view-tabs{margin-top:0}
+@media(max-width:850px){#conflict .conflict-list{grid-template-columns:1fr}}
+@media(max-width:620px){#conflict .conflict-heading h2{font-size:25px}#conflict .conflict-metrics{gap:7px}#conflict .conflict-metric{padding:11px}#conflict .conflict-metric strong{font-size:23px}#conflict .conflict-metric span{font-size:10px}#conflict .conflict-toolbar label,#conflict .conflict-toolbar label:first-child{min-width:100%;flex:1}#conflict input,#conflict select{font-size:16px}#conflict .conflict-card{padding:15px}#conflict .conflict-card h3{font-size:19px}#conflict .conflict-contender{flex-wrap:wrap}#conflict .conflict-score{white-space:normal}}
+
+/* CONF_TAB_V2: minimum influence and competition ranking. */
+#conflict .conflict-card-badges{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+#conflict .conflict-participant-count{display:inline-block;padding:5px 8px;border:1px solid #b19665;background:#f6e9ca;color:#54402b;font-size:10px;font-weight:700;white-space:nowrap}
+#conflict .conflict-goal{background:#f8edcf;border-left:3px solid #97703e;padding:11px 13px;margin:0 0 15px}
+#conflict .conflict-goal-main{display:flex;gap:6px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}
+#conflict .conflict-goal-label{font-weight:700;letter-spacing:.05em;font-size:10px;color:#78532f}
+#conflict .conflict-goal-amount{font-family:Georgia,serif;font-size:19px;font-weight:600;color:#533a1e}
+#conflict .conflict-goal-note{font-size:11px;color:#63523d;margin:5px 0 0;line-height:1.45}
+#conflict .conflict-score{display:flex;flex-direction:column;text-align:right;align-items:flex-end;gap:0}
+#conflict .conflict-score strong{font-size:12px;font-weight:700;color:#51371f}
+#conflict .conflict-score small{font-size:10px;color:#786047}
+@media(max-width:620px){#conflict .conflict-card-badges{justify-content:flex-start}#conflict .conflict-goal-amount{font-size:18px}#conflict .conflict-score{text-align:left;align-items:flex-start}}
+
+
+/* CONFLICT CLEANUP: less noisy card layout */
+#conflict .conflict-card{padding:18px}
+#conflict .conflict-card-top{padding-bottom:11px;margin-bottom:11px}
+#conflict .conflict-card-badges{gap:5px}
+#conflict .conflict-participant-count{
+  padding:4px 7px;
+  border:1px solid #c7b089;
+  background:transparent;
+  color:#6a5339;
+  font-size:10px;
+  font-weight:700;
+}
+#conflict .conflict-goal{
+  background:#f7ebcf;
+  border:1px solid #d6c19b;
+  border-left:3px solid #97703e;
+  padding:10px 12px;
+  margin:0 0 12px;
+}
+#conflict .conflict-goal-main{gap:4px 10px}
+#conflict .conflict-goal-amount{font-size:17px}
+#conflict .conflict-goal-note{
+  font-size:10px;
+  color:#675541;
+  margin:4px 0 0;
+  line-height:1.4;
+  max-width:44ch;
+}
+#conflict .conflict-holder{
+  margin:0 0 12px;
+  font-size:12px;
+  color:#5d4a38;
+}
+#conflict .conflict-contender-title{
+  font-size:10px;
+  letter-spacing:.08em;
+  margin:6px 0;
+}
+#conflict .conflict-contender{padding:9px 0}
+#conflict .conflict-score{
+  display:block;
+  text-align:right;
+  white-space:nowrap;
+  font-weight:600;
+  font-size:12px;
+  color:#51371f;
+}
+#conflict .conflict-score strong,
+#conflict .conflict-score small{display:inline;font-size:inherit;color:inherit;font-weight:inherit}
+#conflict .conflict-card-foot{margin-top:12px}
+@media(max-width:620px){
+  #conflict .conflict-score{text-align:left;white-space:normal}
+}
+
+
+/* Conflict compact influence display */
+#conflict .conflict-goal-amount {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+#conflict .conflict-score {
+    display: block !important;
+    text-align: right !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}

@@ -1,0 +1,10 @@
+/* The third tab inherits the original .view-tabs button rules. */
+#guilds[hidden] { display: none !important; }
+#guilds.guilds-inline { padding-top: 20px; }
+#guilds-inline-frame {
+  display: block;
+  width: 100%;
+  min-height: 620px;
+  border: none;
+  background: transparent;
+}

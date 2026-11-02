@@ -1,0 +1,138 @@
+/* GUILD_NATIVE_TAB_V1: Native Guild tab. Scoped to #guilds; no global layout changes. */
+#guilds{color-scheme:light;--ink:#302d26;--muted:#585044;--gold:#81501f;--line:#ab8b58;--paper:#fff4db;font-family:Inter,Arial,sans-serif}
+#guilds *{box-sizing:border-box}
+#guilds{color:var(--ink);font-size:15px;line-height:1.6}
+#guilds a{color:#76451d}
+#guilds a:hover{text-decoration:underline}
+#guilds button, #guilds input, #guilds select{font:inherit}
+#guilds button{cursor:pointer;background:#604324;border:1px solid #876237;color:#fff4dc;padding:9px 14px;box-shadow:inset 0 1px #b39768}
+#guilds button:hover{background:#79532b}
+#guilds button:disabled{opacity:.6;cursor:wait}
+#guilds :focus-visible{outline:3px solid #266583;outline-offset:3px}
+#guilds [hidden]{display:none!important}
+#guilds .masthead{max-width:1300px;margin:auto;padding:24px 16px;display:flex;justify-content:space-between;align-items:center;gap:20px;color:#ecd6a4}
+#guilds .masthead a{color:inherit;text-decoration:none}
+#guilds .brand{font-family:Cinzel,Georgia,serif;letter-spacing:.06em;font-size:18px}
+#guilds .brand small{display:block;font:10px Inter,Arial,sans-serif;letter-spacing:.18em;margin-top:4px}
+#guilds .masthead nav{display:flex;gap:26px;font-size:14px}
+#guilds .masthead nav a[aria-current]{border-bottom:1px solid #e5c57f}
+#guilds .guild-page{max-width:100%;margin:0;padding:0;background:transparent;border:0;box-shadow:none;outline:0}
+#guilds h1, #guilds h2, #guilds h3{font-family:Cinzel,Georgia,serif;font-weight:500;line-height:1.25;color:#51371f}
+#guilds h1{font-size:48px;margin:10px 0 16px}
+#guilds h2{font-size:25px;margin:0}
+#guilds h3{font-size:21px;margin:7px 0 14px}
+#guilds .eyebrow{text-transform:uppercase;font-weight:700;font-size:11px;letter-spacing:.12em;color:#855025}
+#guilds .intro{border-bottom:1px solid #987b50;padding-bottom:20px;margin-bottom:20px}
+#guilds .intro>p:last-child{max-width:740px;margin-bottom:0}
+#guilds .coverage{padding:14px 18px;border:1px solid #ad854a;border-left:4px solid #a97129;background:#f2e2bd;font-size:13px;margin-bottom:22px}
+#guilds .coverage strong{display:block;margin-bottom:4px}
+#guilds .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0 24px}
+#guilds .total, #guilds .profile-stat{border:1px solid #a17e47;background:#f8edce;padding:16px 22px}
+#guilds .total strong, #guilds .profile-stat strong{display:block;font-size:29px;font-family:Georgia,serif;color:#60411e}
+#guilds .total span, #guilds .profile-stat span{font-size:12px;color:#5a4b39}
+#guilds .toolbar{display:flex;align-items:end;flex-wrap:wrap;gap:14px;background:#e7d4ad;border:1px solid #967243;padding:18px;margin-bottom:28px}
+#guilds .toolbar label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600}
+#guilds .toolbar label:first-child{flex:1;min-width:230px}
+#guilds input, #guilds select{background:#fff8e9;border:1px solid #a58557;padding:10px;color:#302d26;border-radius:0;max-width:100%}
+#guilds .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 10px}
+#guilds .section-title>span, #guilds .explain{font-size:12px;color:var(--muted)}
+#guilds .explain{line-height:1.65;margin:8px 0 16px}
+#guilds .table-scroll{overflow-x:auto;background:var(--paper);border:1px solid #967243;box-shadow:0 3px 8px #39251224}
+#guilds table{width:100%;border-collapse:collapse}
+#guilds th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:#e9d6b0;color:#594229;white-space:nowrap}
+#guilds td, #guilds th{padding:15px 16px;border-bottom:1px solid #c8b18c}
+#guilds td{font-variant-numeric:tabular-nums;font-size:14px}
+#guilds tbody tr:nth-child(even){background:#f5e7c8}
+#guilds tbody tr:hover{background:#eee0be}
+#guilds .guild-link{font-weight:700;font-size:15px;text-decoration:none;display:block}
+#guilds .guild-tag{display:block;color:#745634;font-size:11px;letter-spacing:.09em}
+#guilds .rank{color:#896534;font-family:Georgia,serif;font-size:22px}
+#guilds .map-section{margin-top:34px}
+#guilds .map-controls{display:flex;gap:5px}
+#guilds .map-controls button{font-size:12px;padding:6px 10px}
+#guilds #territory-map{border:2px solid #927449;background:#f1e5c9;min-height:220px;overflow:hidden}
+#guilds #territory-map svg{width:100%;height:390px;display:block}
+#guilds .map-coast{fill:none;stroke:#5c7c7b;stroke-width:1.1;vector-effect:non-scaling-stroke}
+#guilds .map-border{fill:none;stroke:#ac9065;stroke-width:.8;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
+#guilds .map-pin{fill:#ba8428;stroke:#623e13;stroke-width:2;vector-effect:non-scaling-stroke}
+#guilds .map-pin.contender{fill:#fff5dd}
+#guilds .map-label{fill:#362817;font-family:Inter,Arial,sans-serif;font-weight:600;paint-order:stroke;stroke:#fff2d9;stroke-width:4px;stroke-linejoin:round}
+#guilds .seat-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+#guilds .seat-card{padding:20px;background:var(--paper);border:1px solid #937143;box-shadow:0 3px 8px #39251226;scroll-margin-top:20px}
+#guilds .seat-card:target{outline:3px solid #a77724}
+#guilds .seat-card p{margin:6px 0;font-size:13px}
+#guilds .seat-card .eyebrow{font-size:10px}
+#guilds .seat-card time{font-size:11px;color:#665a47}
+#guilds .pill{font-size:11px;border:1px solid #b19665;padding:2px 7px;display:inline-block;background:#eee0bd}
+#guilds .method{background:#eedfbe;border:1px solid #a08254;padding:18px 22px;margin:35px 0 24px;font-size:13px}
+#guilds .method summary{cursor:pointer;font-weight:700}
+#guilds .method p{max-width:920px}
+#guilds .profile-head{display:flex;gap:22px;justify-content:space-between;align-items:start;margin:20px 0}
+#guilds .profile-actions{display:flex;gap:10px;align-items:center}
+#guilds .profile-actions a{font-size:13px}
+#guilds .profile-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+#guilds .profile-note{padding:14px 18px;background:#f8edcf;border-left:3px solid #ad8241;font-size:13px}
+#guilds .profile-crest{font-size:13px;color:#655139}
+#guilds #share-status{font-size:12px}
+#guilds footer{font-size:11px;border-top:1px solid #a68a5b;padding-top:18px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+#guilds #guild-empty{padding:20px;background:var(--paper)}
+@media (max-width:850px){#guilds .guild-page{max-width:100%;margin:0;padding:0;background:transparent;border:0;box-shadow:none;outline:0}
+#guilds .seat-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+#guilds .masthead{padding:18px 24px}
+#guilds .masthead nav{gap:14px}
+#guilds .section-title{flex-wrap:wrap}
+#guilds h1{font-size:37px}
+#guilds .profile-head{flex-wrap:wrap}}
+@media (max-width:560px){#guilds .guild-page{max-width:100%;margin:0;padding:0;background:transparent;border:0;box-shadow:none;outline:0}
+#guilds .masthead{flex-wrap:wrap;padding:18px}
+#guilds .brand{font-size:16px}
+#guilds .masthead nav{font-size:12px;width:100%;justify-content:space-between}
+#guilds .totals, #guilds .profile-facts{grid-template-columns:1fr;gap:8px}
+#guilds .total{display:flex;align-items:center;gap:16px;padding:9px 15px}
+#guilds .total strong{font-size:24px}
+#guilds .toolbar{padding:12px}
+#guilds .toolbar label{width:100%}
+#guilds .toolbar button{width:100%}
+#guilds .seat-cards{grid-template-columns:1fr}
+#guilds h1{font-size:31px}
+#guilds h2{font-size:22px}
+#guilds .profile-stat{padding:12px 16px}
+#guilds .profile-stat strong{font-size:25px}
+#guilds .map-controls{flex-wrap:wrap}
+#guilds #territory-map svg{height:300px}
+#guilds td, #guilds th{padding:12px}
+#guilds .coverage{padding:12px}}
+
+/* Embedded into the existing parchment container. */
+#guilds { display:block; min-width:0; padding-top:22px; }
+#guilds[hidden] { display:none !important; }
+#guilds .guild-page { min-width:0; width:100%; margin:0; padding:0; border:0; box-shadow:none; }
+#guilds .guild-page .intro { padding-top:0; }
+#guilds .guild-page .intro h1 { margin-top:0; }
+#guilds .guild-page .toolbar { align-items:flex-end; }
+#guilds .guild-page .toolbar button { min-width:max-content; }
+#guilds .guild-page footer { color:var(--muted); }
+#guilds .guild-page a.guild-link { cursor:pointer; }
+#guilds .seat-card.guild-seat-highlight { outline:3px solid #a77724; }
+@media(max-width:560px){#guilds .guild-page .toolbar button{min-width:0}}
+
+/* Guilds heading — match the other tabs */
+#guilds #page-title {
+  font-size: 29px !important;
+  font-weight: 500 !important;
+  line-height: 1.25;
+  margin: 0 0 12px;
+}
+
+/* Guilds description — match the parchment theme */
+#guilds #page-intro {
+  color: #403d35 !important;
+  font-size: 13px !important;
+  line-height: 1.7;
+}
+
+@media (max-width: 620px) {
+  #guilds #page-title {
+    font-size: 25px !important;
+  }
+}

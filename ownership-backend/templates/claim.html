@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% block content %}
+{% include "shop_requirements.html" %}
+{# DFO_SHOP_REFRESH_V1: refresh only this shop, using the private owner-worker queue. #}
+<section class="shop-refresh" aria-label="Refresh shop inventory">
+  <p>Recently listed an item? Refresh just this shop without waiting for the hourly inventory scan.</p>
+  <form method="post" action="">
+    {% csrf_token %}
+    <button type="submit" name="action" value="refresh">Refresh This Shop</button>
+  </form>
+  {% if refresh_state == 'queued' %}<p>Shop scan queued. Reload this page shortly.</p>{% endif %}
+  {% if refresh_state == 'ready' %}<p>Fresh shop inventory was checked. Choose an item below to continue.</p>{% endif %}
+  {% if refresh_state == 'failed' %}<p>The game inventory was unavailable. Please try refreshing again later.</p>{% endif %}
+</section>
+<section class="owner-panel"><p class="eyebrow">VERIFY SHOP OWNERSHIP</p><h1>{{ shop.seller }}’s shop</h1><p>{{ shop.town }} · {{ shop.region }}</p><p>Select an inexpensive item already in your vendor. We’ll give you a temporary gold price. In game, cancel that listing and list one item of the same type and material at the exact price provided.</p><p>The new listing must be created after the challenge starts. Keep it listed until verification succeeds, then cancel it or restore its normal price.</p>{% if current %}<p class="owner-message">This shop already has a website owner. Successful verification will give this account control and remove the previous account’s access. Customizations are cleared if the website owner changes.</p>{% endif %}{% if rows %}<form method="post">{% csrf_token %}<label for="listing">Item to relist</label><select id="listing" name="listing" required>{% for r in rows %}<option value="{{ r.id }}">{{ r.name }} · {{ r.material }} {{ r.template }} · {{ r.price }} {{ r.currency }}</option>{% endfor %}</select><p class="owner-note">Use a low-value item: this creates a real sale listing. Nothing is bought, cancelled or repriced automatically.</p><button class="shop-primary">Create verification challenge</button></form>{% else %}<p>Add an inexpensive item to this public vendor, then click Refresh This Shop and reload this page.</p>{% endif %}</section>{% endblock %}

@@ -1,0 +1,20 @@
+.da-panel { border-left: 4px solid #9b7640; }
+.da-explain { margin: 5px 0 16px; color: #594a36; }
+.da-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #c2a679; }
+.da-action { border: 1px solid #84623a; background: #71502f; color: #fff6e6; padding: 9px 13px; border-radius: 3px; cursor: pointer; font: 600 14px/1.3 system-ui, Segoe UI, sans-serif; }
+.da-action:hover, .da-action:focus-visible { background: #54371e; }
+.da-action:focus-visible { outline: 3px solid #b78b49; outline-offset: 2px; }
+.da-undo { background: transparent; color: #5a4630; }
+.da-undo:hover, .da-undo:focus-visible { color: white; }
+.da-caption { font-size: 13px; color: #725d43; }
+.da-count { font-weight: 700; color: #4b3422; margin: 14px 0 3px; }
+.da-spawns { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 9px; }
+.da-spawn { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #e7d2a8; padding: 12px 14px; border-left: 3px solid #be9b64; }
+.da-current { border-left-color: #a24b26; background: #ead4ab; }
+.da-info { min-width: 0; display: grid; gap: 2px; }
+.da-info strong { overflow-wrap: anywhere; font-size: 15px; }
+.da-time { font-size: 12px; color: #69523a; overflow-wrap: anywhere; }
+.da-state { font-size: 13px; font-weight: 600; }
+.da-pending { color: #944420; }
+.da-done { color: #34633d; }
+@media (max-width: 520px) { .da-spawn { align-items: start; flex-direction: column; } .da-spawn button { width: 100%; } }

@@ -1,0 +1,14 @@
+// Server-revealed DFO dragon watch, using existing authenticated world-chat socket.
+// No future prediction; no additional socket and no credentials in the web output.
+import {writeFile,rename,chmod} from 'node:fs/promises';
+const HR=3600000,SPAN=1200000,STAY=2400000,CLIMB=15000,REMAINS=600000;
+const provinces=['Iliac Bay','High Rock','Hammerfell','Skyrim','Morrowind','Summerset Isle','Valenwood','Elsweyr','Black Marsh'];
+function hash(...ns){let h=0x811c9dc5;for(const n of ns){h^=n>>>0;h=Math.imul(h,0x01000193);h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;}return h>>>0;}
+export function dragonOf(w,s){if(!Number.isSafeInteger(w)||w<0||!Number.isSafeInteger(s)||s<0||s>0xffffffff)return null;const r=k=>hash(s,w,k);if(r(0)%3!==0)return null;const landAt=w*HR+(r(6)%1200)*1000,lane=r(2)%9;return {watch:w,province:provinces[lane],lane,variant:r(1)%20===0?'Aetherbright':'Dwarven Dragon',landAt,leaveAt:landAt+STAY,siteDay:50000000+r(5)%50000000};}
+export function createDragonMonitor(out){const omens=new Map(),asked=new Map();let connected=false,lastMessageAt=0,lastDragon=null,queue=Promise.resolve();
+function state(){const now=Date.now(),w=Math.floor(now/HR);let dragon=null;for(const n of [w,w-1]){let seed=omens.get(n);if(seed===null||seed===undefined)continue;const d=dragonOf(n,seed);if(d&&now>=d.landAt&&now<d.leaveAt+REMAINS+CLIMB){dragon=d;break;}}if(dragon)lastDragon=dragon;return {version:2,updatedAt:now,connected,lastMessageAt,watch:w,status:dragon?(now<dragon.leaveAt?'detected':'departure'):omens.has(w)&&!dragonOf(w,omens.get(w))?'quiet':'awaiting',dragon,previous:lastDragon,note:'Verified server omen, not a prediction. Exact map tile and death/alive status are not available from the omen.'};}
+function publish(){const body=JSON.stringify(state());queue=queue.then(async()=>{await writeFile(out+'.tmp',body,{mode:0o640});await chmod(out+'.tmp',0o640);await rename(out+'.tmp',out);}).catch(()=>console.error('Private dragon status write failed'));}
+function onMessage(_ws,m){lastMessageAt=Date.now();if(m?.t==='welcome'){connected=true;publish();}if(m?.t==='dragon'&&m.k==='omen'&&Number.isSafeInteger(m.w)&&(m.s===null||Number.isSafeInteger(m.s)&&m.s>=0&&m.s<=0xffffffff)){const w=Math.floor(Date.now()/HR);if(m.w===w||m.w===w-1){omens.set(m.w,m.s);publish();}}}
+function tick(ws,up){connected=!!up;const now=Date.now(),w=Math.floor(now/HR);if(up&&ws?.readyState===1)for(const n of [w,w-1]){if(n<0||omens.has(n)||now<n*HR||now>=n*HR+SPAN+STAY+REMAINS+CLIMB||now-(asked.get(n)??-Infinity)<15000)continue;try{ws.send(JSON.stringify({t:'dragon',k:'ask',w:n}));asked.set(n,now);}catch{}}for(const n of omens.keys())if(n<w-1)omens.delete(n);for(const n of asked.keys())if(n<w-1)asked.delete(n);publish();}
+function disconnect(){connected=false;publish();}
+return {onMessage,tick,disconnect,publish,state};}

@@ -1,0 +1,5 @@
+/* Event region control; inherits the established parchment theme. */
+.event-region-control {display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;margin:0 0 1.25rem;padding:1rem 1.15rem;background:#fbf1d8;border:1px solid #927345;color:#292824;font:600 14px/1.5 Inter,system-ui,sans-serif;box-shadow:0 2px 5px #33251726}
+.event-region-control select {min-width:245px;max-width:100%;padding:.6rem .8rem;background:#fff8e8;color:#292824;border:1px solid #927345;font:inherit}
+.event-region-control select:focus-visible {outline:3px solid #8a4b25;outline-offset:3px}
+@media(max-width:600px){.event-region-control{align-items:stretch}.event-region-control select{width:100%;min-width:0}}

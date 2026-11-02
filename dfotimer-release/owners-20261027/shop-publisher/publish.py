@@ -1,0 +1,262 @@
+"""Generate public, static shop documents and Discord cards from public snapshots.
+
+No inbound service, credentials, game requests, or user-provided paths. Run after
+scans via a user timer. HTML and image are replaced atomically; old shops retain
+an unavailable page, never obsolete stock. Private state stays outside webroot.
+"""
+import argparse
+import hashlib
+import html
+import io
+import json
+import os
+from pathlib import Path
+import re
+import time
+from datetime import datetime, timezone
+from PIL import Image, ImageDraw, ImageFont
+
+HERE = Path(__file__).resolve().parent
+ORIGIN = 'https://dfo.spaceghosts.com/'
+VERSION = 'owners-20261027-1'
+RANK = {'gilded':0,'aetheric':1,'artifact':2,'legendary':3,'rare':4,'magic':5,'common':6}
+COLORS = ['#7b6b52','#526a79','#687348','#9b5c38']
+
+def identity(shop):
+    mid, vid = shop.get('map'), shop.get('vendorId')
+    if type(mid) is not int or not 0 < mid <= 0xffffffff or not isinstance(vid,str) or not 0 < len(vid) <= 128 or re.search(r'[\x00-\x1f\x7f]',vid):
+        raise ValueError('Invalid public shop identity')
+    return f'{mid}/{vid.encode("utf-8").hex()}'
+
+def public_shop(shop):
+    identity(shop)
+    out={k:shop.get(k) for k in ['map','vendorId','buildingKey','checkedAt']}
+    for k in ['seller','town','region']:
+        value=shop.get(k,'')
+        out[k]=re.sub(r'[\x00-\x1f\x7f]','',value)[:160] if isinstance(value,str) else ''
+    out['status']=shop.get('status','available') if shop.get('status','available') in ['available','unavailable','not-listed'] else 'unavailable'
+    return out
+
+def stamp(ms):
+    return datetime.fromtimestamp(ms/1000,timezone.utc).strftime('%d %b %Y, %H:%M UTC') if isinstance(ms,(int,float)) and 0 < ms < 1e14 else 'Not available'
+
+def atomic(path,data):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    # umask is private; explicitly grant only the static output directories.
+    for directory in [path.parent,path.parent.parent]: directory.chmod(0o755)
+    if path.is_symlink(): raise ValueError('Refuse symlink output')
+    temp=path.with_name(path.name+'.next')
+    with temp.open('xb') as f:f.write(data)
+    temp.chmod(0o644);os.replace(temp,path)
+
+def font(size,bold=False,serif=False):
+    names = ['DejaVuSerif.ttf'] if serif else ['DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf']
+    candidates=[Path('/usr/share/fonts/truetype/dejavu')/names[0],Path('C:/Windows/Fonts')/('georgia.ttf' if serif else 'arialbd.ttf' if bold else 'arial.ttf')]
+    for path in candidates:
+        if path.is_file():return ImageFont.truetype(str(path),size)
+    return ImageFont.load_default(size=size)
+
+def fit(draw,text,f,max_width):
+    value=str(text)
+    if draw.textlength(value,font=f)<=max_width:return value
+    while value and draw.textlength(value+'…',font=f)>max_width:value=value[:-1]
+    return value+'…'
+
+def load_map(root,shop,cache):
+    mid=shop['map']
+    if mid not in cache:
+        path=root/'maps'/f'{mid}.json'
+        if not path.is_file() or path.stat().st_size>2*1024*1024:
+            cache[mid]=None
+        else:
+            data=json.loads(path.read_text(encoding='utf-8'))
+            w,h=data.get('width'),data.get('height')
+            if data.get('version')!=2 or data.get('map')!=mid or type(w) is not int or type(h) is not int or not 0<w<=1024 or not 0<h<=1024:
+                raise ValueError('Invalid map dimensions')
+            if len(data.get('rectangles',[]))>100000 or len(data.get('buildings',[]))>5000:raise ValueError('Oversized map')
+            for r in data.get('rectangles',[]):
+                if len(r)!=5 or not all(type(v) is int for v in r):raise ValueError('Invalid map rectangle')
+                x,y,rw,rh,kind=r
+                if min(x,y)<0 or min(rw,rh)<=0 or x+rw>w or y+rh>h or not 0<=kind<=3:raise ValueError('Out of bounds map')
+            for b in data.get('buildings',[]):
+                if not isinstance(b.get('x'),(int,float)) or not isinstance(b.get('y'),(int,float)) or not 0<=b['x']<=w or not 0<=b['y']<=h:raise ValueError('Invalid map anchor')
+            cache[mid]=data
+    return cache[mid]
+
+def card(shop,rows,map_data,stale,profile=None,media=None):
+    im=Image.new('RGB',(1200,630),'#e8d7b3');d=ImageDraw.Draw(im)
+    d.rectangle((0,0,1199,629),outline='#3b3025',width=12)
+    d.rectangle((17,17,1182,612),outline='#90703f',width=2)
+    d.rectangle((23,23,1176,606),outline='#c9ab76',width=1)
+    d.text((38,34),'DAGGERFALL WATCH  /  PLAYER SHOP',font=font(17,True),fill='#78422b')
+    d.text((38,75),fit(d,(shop['seller'] or 'Unnamed seller')+'’s shop',font(42,serif=True),1100),font=font(42,serif=True),fill='#69411c')
+    d.text((40,134),fit(d,f"{shop['town']} · {shop['region']}",font(23),1100),font=font(23),fill='#755337')
+    status=shop['status']
+    summary=f'{len(rows):,} listings · {sum(r["quantity"] for r in rows):,} items'
+    if status!='available':summary='Stock unavailable · check the shop page'
+    elif stale:summary='Older snapshot · '+summary
+    d.text((40,179),summary,font=font(19,True),fill='#79501e')
+    d.line((40,216,1160,216),fill='#b39a70',width=1)
+    has_banner=bool(profile and profile.get('banner') and media)
+    if has_banner:
+        from PIL import ImageOps
+        with Image.open(media/profile['banner']) as source:
+            banner=ImageOps.fit(source.convert('RGB'),(1122,187),method=Image.Resampling.LANCZOS)
+        # Replace the title area while preserving the shop identity in page text
+        # and metadata. The uploaded sign uses the same 6:1 crop as the website.
+        d.rectangle((30,65,1170,300),fill='#e8d7b3')
+        im.paste(banner,(39,65));d.rectangle((38,64,1162,252),outline='#90703f',width=1)
+        d.text((40,264),fit(d,f"{shop['seller']} · {shop['town']} · {len(rows)} listings",font(17,True),1100),font=font(17,True),fill='#69411c')
+        d.line((40,294,1160,294),fill='#b39a70')
+    d.text((40,305 if has_banner else 239),'FEATURED STOCK' if rows else 'SHOP STATUS',font=font(16,True),fill='#78422b')
+    if not rows:
+        message='No active listings in the latest snapshot.' if status=='available' else 'No verified stock in the latest scan.'
+        d.text((40,350 if has_banner else 286),message,font=font(18),fill='#67533a')
+    chosen=featured_rows(rows,profile)
+    for i,row in enumerate(chosen):
+        y=(339+i*68) if has_banner else (278+i*88)
+        color='#69411c' if row.get('rarity')=='gilded' else '#38291c'
+        d.text((40,y),fit(d,row['name'],font(23,True),560),font=font(23,True),fill=color)
+        detail=f"{row.get('rarity','common').upper()} · {row['price']:,} {row['currency']} · Qty {row['quantity']}"
+        d.text((40,y+33),fit(d,detail,font(16),560),font=font(16),fill='#6f583c')
+    box=(650,304 if has_banner else 238,1155,548);d.rectangle(box,fill='#d9c69f',outline='#9b7a47')
+    if map_data:
+        w,h=map_data['width'],map_data['height'];scale=min(465/w,(204 if has_banner else 270)/h);ox=902.5-w*scale/2;oy=(426 if has_banner else 393)-h*scale/2
+        for x,y,rw,rh,kind in map_data['rectangles']:
+            d.rectangle((ox+x*scale,oy+y*scale,ox+(x+rw)*scale,oy+(y+rh)*scale),fill=COLORS[kind])
+        anchor=next((b for b in map_data['buildings'] if b['key']==shop.get('buildingKey')),None)
+        if anchor:
+            x,y=ox+anchor['x']*scale,oy+anchor['y']*scale
+            d.ellipse((x-11,y-11,x+11,y+11),fill='#ffda65',outline='#6c321a',width=3)
+            d.ellipse((x-4,y-4,x+4,y+4),fill='#7b3b20')
+        label_y=310 if has_banner else 244
+        d.rectangle((659,label_y,848,label_y+24),fill='#e8d7b3')
+        d.text((668,label_y+3),'N ↑  ·  GOLD = HOUSE' if anchor else 'N ↑  ·  TOWN MAP',font=font(13,True),fill='#7b3b20')
+    else:
+        d.text((677,350),'Map not yet available',font=font(22),fill='#79501e')
+        d.text((677,388),'Use Set waypoint in game',font=font(17),fill='#6f583c')
+    d.line((40,566,1160,566),fill='#b39a70')
+    d.text((40,584),'Checked '+stamp(shop.get('checkedAt')),font=font(15),fill='#6f583c')
+    d.text((795,584),'Snapshot only · Stock may sell',font=font(15),fill='#6f583c')
+    result=io.BytesIO();im.save(result,format='PNG',optimize=True);return result.getvalue()
+
+def document(shop,rows,revision,stale,profile=None):
+    esc=lambda value:html.escape(str(value),quote=True)
+    path='shops/'+identity(shop)+'/'
+    title=(shop['seller'] or 'Unnamed seller')+'’s shop'
+    description=f"{shop['town']} · {shop['region']}. {len(rows):,} listings. Checked {stamp(shop.get('checkedAt'))}. Stock may sell between scans."
+    if shop['status']!='available':description=f"{shop['town']} · {shop['region']}. Stock is unavailable in the latest scan."
+    if stale:description='Older inventory snapshot. '+description
+    cells=[]
+    for row in rows:
+        cells.append('<tr><td>'+esc(row['name'])+'</td><td>'+esc(f"{row['price']:,} {row['currency']}")+'</td><td>'+esc(row['quantity'])+'</td></tr>')
+    banner='';gallery='';heading=esc(title)
+    if profile and profile.get('banner'):
+        banner='<img class="shop-owner-banner" width="1440" height="240" src="../../../shop-media/'+esc(profile['banner'])+'" alt="'+esc(title)+' banner">'
+        heading='<span class="owner-visually-hidden">'+esc(title)+'</span>'
+    if profile and profile.get('gallery'):
+        figures=[]
+        for g in profile['gallery']:
+            caption=g.get('caption','')
+            url='../../../shop-media/'+esc(g['file'])
+            figures.append('<figure><a href="'+url+'" target="_blank" rel="noopener"><img loading="lazy" src="'+url+'" alt="'+esc(caption or 'Inside '+title)+'"></a><figcaption>'+esc(caption)+'</figcaption></figure>')
+        gallery='<section class="shop-owner-gallery" aria-label="Shop screenshots"><h2>Inside the shop</h2><p>Photos shared by the verified shop owner.</p><div>'+''.join(figures)+'</div></section>'
+    values={'TITLE':esc(title),'HEADING':heading,'BANNER':banner,'GALLERY':gallery,'OWNER_CLASS':' has-owner-banner' if banner else '',
+        'CLAIM_URL':esc(ORIGIN+'owner/claim/'+identity(shop)+'/'),
+        'DESCRIPTION':esc(description),'URL':esc(ORIGIN+path),'IMAGE':esc(ORIGIN+path+'preview.png?v='+revision),
+        'MAP':str(shop['map']),'VENDOR':esc(shop['vendorId']),'SELLER':esc(shop['seller']),'TOWN':esc(shop['town']),'REGION':esc(shop['region']),
+        'CHECKED':esc(stamp(shop.get('checkedAt'))),'COUNT':str(len(rows)),'ROWS':''.join(cells),'REVISION':revision}
+    output=(HERE/'template.html').read_text(encoding='utf-8')
+    for key,value in values.items():output=output.replace('@@'+key+'@@',value)
+    return output.encode('utf-8')
+
+ASSET_RE=re.compile(r'[a-f0-9]{32}\.jpg\Z')
+def featured_rows(rows,profile=None):
+    selected=[];by_id={r['id']:r for r in rows}
+    for key in (profile or {}).get('featured',[])[:3]:
+        if key in by_id and key not in {r['id'] for r in selected}:selected.append(by_id[key])
+    for row in rows:
+        if len(selected)>=3:break
+        if row['id'] not in {r['id'] for r in selected}:selected.append(row)
+    return selected[:3]
+
+def load_profiles():
+    path=Path(os.environ.get('DFO_OWNER_PROFILES','/home/ryan/dfotimer-owners/private/published-profiles.json'))
+    media=Path(os.environ.get('DFO_OWNER_MEDIA','/home/ryan/dfotimer-owners/private/media'))
+    if not path.exists():return {},media
+    if path.is_symlink() or path.stat().st_size>4*1024*1024:raise ValueError('Invalid owner export')
+    profiles=json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(profiles,dict):raise ValueError('Invalid owner export')
+    return profiles,media
+
+def safe_profile(raw,shop,media):
+    if not isinstance(raw,dict) or shop.get('status')!='available' or raw.get('seller')!=shop['seller'] or not isinstance(raw.get('verifiedUntil'),(int,float)) or raw['verifiedUntil']<=time.time()*1000:return None
+    result={'featured':[x for x in raw.get('featured',[]) if isinstance(x,str) and len(x)<=128][:3],'banner':'','gallery':[]}
+    def valid_image(name):
+        if not isinstance(name,str) or not ASSET_RE.fullmatch(name):return False
+        path=media/name
+        if path.is_symlink() or not path.is_file() or path.stat().st_size>2*1024*1024:return False
+        with Image.open(path) as im:
+            if im.format!='JPEG' or im.width>1600 or im.height>1200:return False
+            im.verify()
+        return True
+    if valid_image(raw.get('banner')):result['banner']=raw['banner']
+    for g in raw.get('gallery',[])[:4]:
+        if isinstance(g,dict) and valid_image(g.get('file')):
+            result['gallery'].append({'file':g['file'],'caption':str(g.get('caption',''))[:120]})
+    return result
+
+def build(root,state):
+    root=root.resolve();state=state.resolve();state.mkdir(parents=True,exist_ok=True)
+    raw=(root/'vendors.json').read_bytes()
+    if len(raw)>32*1024*1024:raise ValueError('Snapshot too large')
+    snapshot=json.loads(raw)
+    if snapshot.get('version')!=1 or not isinstance(snapshot.get('listings'),list) or not isinstance(snapshot.get('updatedAt'),(int,float)):raise ValueError('Invalid snapshot')
+    now=time.time()*1000;groups={};shops={};cache={}
+    profiles,owner_media=load_profiles();used_media=set()
+    for row in snapshot['listings']:
+        key=identity(row);shops.setdefault(key,public_shop(row))
+        if row.get('expiresAt',0)>now and type(row.get('quantity')) is int and row['quantity']>0 and type(row.get('price')) is int and row['price']>=0:
+            groups.setdefault(key,[]).append(row)
+    if isinstance(snapshot.get('shops'),list):shops={identity(s):public_shop(s) for s in snapshot['shops']}
+    old=json.loads((state/'catalog.json').read_text(encoding='utf-8')) if (state/'catalog.json').is_file() else {}
+    # Missing shops keep a working address with no previous stock.
+    for key,previous in old.items():
+        if key not in shops:
+            shop=public_shop(previous['shop']);shop['status']='not-listed';shop['checkedAt']=None;shops[key]=shop
+    (root/'shops').mkdir(exist_ok=True);(root/'shops').chmod(0o755)
+    catalog={};changed=0;map_missing=0
+    for key,shop in shops.items():
+        rows=groups.get(key,[]) if shop['status']=='available' else []
+        rows=sorted(rows,key=lambda row:(RANK.get(row.get('rarity'),99),row.get('name',''),row.get('id','')))
+        map_data=load_map(root,shop,cache);map_missing+=map_data is None
+        stale=now-(shop.get('checkedAt') or snapshot['updatedAt'])>2*60*60*1000
+        profile=safe_profile(profiles.get(key),shop,owner_media)
+        if profile:
+            images=([profile['banner']] if profile['banner'] else [])+[g['file'] for g in profile['gallery']]
+            for name in images:
+                target_image=root/'shop-media'/name
+                if not target_image.exists():atomic(target_image,(owner_media/name).read_bytes())
+                used_media.add(name)
+        digest=hashlib.sha256(json.dumps([VERSION,shop,rows,map_data,stale,profile],ensure_ascii=False,sort_keys=True).encode()).hexdigest()[:20]
+        target=root/'shops'/key
+        if old.get(key,{}).get('revision')!=digest or not (target/'index.html').is_file() or not (target/'preview.png').is_file():
+            atomic(target/'preview.png',card(shop,rows,map_data,stale,profile,owner_media))
+            atomic(target/'index.html',document(shop,rows,digest,stale,profile));changed+=1
+        catalog[key]={'shop':shop,'revision':digest}
+    # Remove only generated media no longer referenced by any public shop.
+    if (root/'shop-media').is_dir():
+        for asset in (root/'shop-media').iterdir():
+            if asset.is_file() and not asset.is_symlink() and ASSET_RE.fullmatch(asset.name) and asset.name not in used_media:asset.unlink()
+    pending=state/'catalog.next';pending.write_text(json.dumps(catalog),encoding='utf-8');pending.chmod(0o600);os.replace(pending,state/'catalog.json')
+    print(json.dumps({'shops':len(shops),'changed':changed,'missingMaps':map_missing,'snapshotUpdatedAt':snapshot['updatedAt']}))
+
+if __name__=='__main__':
+    import contextlib
+    parser=argparse.ArgumentParser();parser.add_argument('--root',type=Path,required=True);parser.add_argument('--state',type=Path,required=True)
+    args=parser.parse_args();os.umask(0o077);args.state.mkdir(parents=True,exist_ok=True)
+    with (args.state/'build.lock').open('w') as lock:
+        if os.name!='nt':
+            import fcntl
+            fcntl.flock(lock,fcntl.LOCK_EX)
+        build(args.root,args.state)

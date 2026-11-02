@@ -1,0 +1,8 @@
+import {readFile} from 'node:fs/promises';
+const s=JSON.parse(await readFile(new URL('./private/session.json',import.meta.url),'utf8'));
+const call=async(path,body)=>{const r=await fetch('https://daggerfall-accounts.mackcothran.workers.dev/v1/market/'+path,{method:'POST',headers:{Authorization:`Bearer ${s.secret}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(20000)});return r.json()};
+const d=await call('vendors',{region:Number(process.argv[2]??20)});
+const publicRows=d.rows?.filter(r=>r.home?.entry==='public')??[];
+console.log(JSON.stringify({names:publicRows.filter(r=>r.item?.group!=='Books').slice(0,30).map(r=>({name:r.item?.name,group:r.item?.group,rarity:r.item?.rarity,keys:Object.keys(r.item??{})}))}));
+console.log(JSON.stringify({rows:d.rows?.length,publicRows:publicRows.length,keys:Object.keys(publicRows[0]??{}),samples:publicRows.slice(0,3).map(r=>({kind:r.kind,item:r.item?Object.fromEntries(Object.entries(r.item).filter(([k])=>['name','templateIndex','group','rarity','material','currentCondition','maxCondition'].includes(k))):null,itemKeys:Object.keys(r.item??{}),units:r.units,price:r.price,state:r.state,currency:r.currency,map:r.map,buildingKey:r.buildingKey,region:r.region,at:r.at,expiresAt:r.expiresAt}))}));
+if(publicRows[0]){const v=await call('vendor',{vendor:publicRows[0].vendor});console.log(JSON.stringify({vendorKeys:Object.keys(v.vendor??{}),stock:v.rows?.length,items:v.rows?.slice(0,2).map(r=>({keys:Object.keys(r),itemKeys:Object.keys(r.item??{}),item:r.item?Object.fromEntries(Object.entries(r.item).filter(([k])=>['name','templateIndex','group','rarity','material','currentCondition','maxCondition'].includes(k))):null}))}));}

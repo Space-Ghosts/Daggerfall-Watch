@@ -1,0 +1,1 @@
+{"name":"dfotimer-observer","private":true,"type":"module","dependencies":{"ws":"^8.18.3"},"scripts":{"start":"node observer.mjs","test":"node --test --test-isolation=none test.mjs"}}

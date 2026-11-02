@@ -1,0 +1,21 @@
+<section class="owner-panel" aria-labelledby="find-shop-title">
+<h2 id="find-shop-title">Find / refresh my shop</h2>
+<p>Missing a shop, or recently received a house? Check the game’s public vendor directory for its current owner.</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="discover">
+<label for="discover-seller">In-game account name</label>
+<input id="discover-seller" name="seller" maxlength="64" required value="{{ lookup.seller }}" placeholder="Enter your in-game account name" aria-describedby="discover-help">
+<label for="discover-region">Shop region</label>
+<select id="discover-region" name="region" required><option value="">Choose a region…</option>{% for value,label in regions %}<option value="{{ value }}" {% if lookup.region == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<p id="discover-help" class="owner-note">Use the account name shown in the game’s Vendor directory. The house must be public and its vendor must have an active listing from the current owner. Finding a shop does not grant editing access; listing verification is still required.</p>
+<button class="shop-primary" type="submit">Find / refresh my shop</button> <a href="{% url 'home' %}">Reload results</a>
+</form>
+{% if lookup_state == 'queued' %}<p class="owner-message" role="status">Lookup queued. Reload results shortly. A full inventory scan may need to finish first.</p>
+{% elif lookup_state == 'failed' %}<p class="owner-message" role="status">The game’s directory could not be reached. This does not mean your house is missing. Try again later.</p>
+{% elif lookup_state == 'ready' and not lookup_data %}<p class="owner-message">These results expired. Run a new lookup.</p>{% endif %}
+{% if lookup_data %}
+{% if lookup_state != 'ready' %}<p class="owner-note">The results below are from the last successful lookup, which may be up to an hour old.</p>{% endif %}
+{% if found_shops %}<h3>Shops found for {{ lookup.seller }}</h3><div class="owner-directory">{% for s in found_shops %}<a href="{% url 'claim' key=s.key %}"><strong>{{ s.seller }}</strong><span>{{ s.town }} · {{ s.region }}</span><span>Open verification / refresh stock ↗</span></a>{% endfor %}</div>
+{% elif lookup_state == 'ready' %}<p>No matching public vendor was returned for <strong>{{ lookup.seller }}</strong> in this region. Check the account name, house access and active stock in game.</p>{% endif %}
+{% if lookup_data.capped %}<p class="owner-note">The game may have limited this response, so a missing shop is not conclusive.</p>{% endif %}
+{% endif %}
+</section>

@@ -1,0 +1,3 @@
+from django.urls import path, re_path
+from . import views
+urlpatterns=[path('owner/',views.home,name='home'),path('owner/register/',views.signup,name='signup'),path('owner/login/',views.signin,name='signin'),path('owner/logout/',views.signout,name='signout'),path('owner/password/',views.password,name='password'),path('owner/challenge/<str:challenge_id>/',views.challenge,name='challenge'),path('owner/image/<str:name>/',views.image_preview,name='image'),re_path(r'^owner/claim/(?P<key>[1-9][0-9]{0,9}/[a-f0-9]{2,256})/$',views.claim,name='claim'),re_path(r'^owner/edit/(?P<key>[1-9][0-9]{0,9}/[a-f0-9]{2,256})/$',views.editor,name='editor')]
